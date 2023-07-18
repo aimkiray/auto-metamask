@@ -111,22 +111,8 @@ def switchPage(func):
         try:
             wait_fast.until(EC.element_to_be_clickable(
                 (By.CSS_SELECTOR, '#popover-content > div > div > section > header > div > button'))).click()
-            # wait_fast.until(EC.element_to_be_clickable(
-            #     (By.XPATH, '//button[text()="Got it"]'))).click()
         except Exception:
             logging.warning("No popover")
-
-        # Wait for transaction to appear in the list
-        # if "Transaction" in func.__name__:
-        #     time.sleep(5)
-        #     try:
-        #         wait.until(EC.element_to_be_clickable(
-        #             (By.XPATH, '//button[text()="Activity"]'))).click()
-        #         wait.until(EC.visibility_of_element_located(
-        #             (By.CSS_SELECTOR, 'div.transaction-list__pending-transactions')))
-        #     except Exception:
-        #         logging.warning("No transaction")
-        #         return
 
         func(*args, **kwargs)
 
@@ -174,7 +160,7 @@ def setupMetamask(recovery_phrase, password):
             (By.XPATH, '//button[text()="Assets"]')))
     except Exception:
         logging.error("Setup failed")
-        sys.exit(1)
+        return
 
     logging.info('Setup success')
 
@@ -215,7 +201,7 @@ def addNetwork(network_name, rpc_url, chain_id, currency_symbol):
             (By.XPATH, '//h6[text()="“' + network_name + '” was successfully added!"]')))
     except Exception:
         logging.error("Add network failed")
-        sys.exit(1)
+        return
 
     logging.info('Add network success')
 
@@ -249,7 +235,7 @@ def changeNetwork(network_name):
             (By.XPATH, '//button[text()="Assets"]')))
     except Exception:
         logging.error("Change network failed")
-        sys.exit(1)
+        return
 
     logging.info('Change network success')
 
@@ -280,7 +266,7 @@ def importPK(priv_key):
             (By.XPATH, '//button[text()="Assets"]')))
     except Exception:
         logging.error("Import PK failed")
-        sys.exit(1)
+        return
 
     logging.info('Import PK success')
 
@@ -296,19 +282,12 @@ def connectWallet():
     wait.until(EC.element_to_be_clickable(
         (By.XPATH, '//button[text()="Connect"]'))).click()
 
-    # try:
-    #     driver.refresh()
-    #     wait.until(EC.element_to_be_clickable(
-    #         (By.XPATH, '//button[text()="Sign"]'))).click()
-    # except Exception:
-    #     logging.warning("No signature required")
-
     try:
         wait_slow.until_not(EC.element_to_be_clickable(
             (By.XPATH, '//button[text()="Connect"]')))
     except Exception:
         logging.error("Connect wallet failed")
-        sys.exit(1)
+        return
 
     logging.info('Connect wallet successfully')
 
@@ -333,7 +312,7 @@ def signWallet():
             (By.XPATH, '//button[text()="Assets"]')))
     except Exception:
         logging.error("Connect wallet failed")
-        sys.exit(1)
+        return
 
     logging.info('Sign successfully')
 
@@ -361,6 +340,6 @@ def confirmTransaction():
             (By.CSS_SELECTOR, '.transaction-status--pending')))
     except Exception:
         logging.error("Confirm transaction failed")
-        sys.exit(1)
+        return
 
     logging.info('Confirm transaction successfully')
