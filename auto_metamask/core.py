@@ -43,7 +43,7 @@ def downloadMetamask(url):
     return local_filename
 
 
-def setupWebdriver(metamask_path):
+def setupWebdriver(metamask_path, chrome_path=None):
     """Initialize chrome browser and install metamask extension
 
     :param metamask_path: Extension file path
@@ -63,8 +63,10 @@ def setupWebdriver(metamask_path):
     options.add_experimental_option('excludeSwitches', ['enable-automation'])
     options.add_experimental_option('useAutomationExtension', False)
     options.add_extension(metamask_path)
-    s = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
+    if chrome_path:
+        options.binary_location = chrome_path
 
+    s = Service(ChromeDriverManager(chrome_type=ChromeType.GOOGLE).install())
     global driver
     driver = webdriver.Chrome(service=s, options=options)
 
@@ -82,7 +84,7 @@ def setupWebdriver(metamask_path):
     wait = WebDriverWait(driver, 20, 1)
 
     global wait_fast
-    wait_fast = WebDriverWait(driver, 5, 1)
+    wait_fast = WebDriverWait(driver, 3, 1)
 
     global wait_slow
     wait_slow = WebDriverWait(driver, 40, 1)
@@ -273,7 +275,7 @@ def addNetwork(network_name, rpc_url, chain_id, currency_symbol):
 
 @switchPage
 def changeNetwork(network_name):
-    """Change network
+    """Switch to a network
 
     :param network_name: Network name
     :type network_name: String
@@ -375,30 +377,64 @@ def approveWallet():
         wait.until(EC.element_to_be_clickable(
             (By.CSS_SELECTOR, "button[data-testid='eth-overview-send']")))
     except Exception:
-        logging.error("Import PK failed")
+        logging.error("Approve failed")
         return
 
     logging.info('Approve successfully')
 
 
 @switchPage
-def signWallet():
-    """Sign wallet
+def approveTokens():
+    """Approve tokens
     """
 
     try:
         wait_fast.until(EC.element_to_be_clickable(
-            (By.XPATH, '//button[text()="Sign"]')))
+        (By.XPATH, "//button[text()='Use default']")))
     except Exception:
-        logging.warning('Sign refresh')
+        logging.warning('Refresh page')
         driver.refresh()
 
     wait.until(EC.element_to_be_clickable(
-        (By.XPATH, '//button[text()="Sign"]'))).click()
+        (By.XPATH, "//button[text()='Use default']"))).click()
+    
+    wait.until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, "button[data-testid='page-container-footer-next']"))).click()
+    
+    wait.until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, "button[data-testid='page-container-footer-next']"))).click()
 
     try:
-        wait.until(EC.visibility_of_element_located(
-            (By.XPATH, '//button[text()="Assets"]')))
+        # This button is only available when the popup is closed
+        wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "button[data-testid='eth-overview-send']")))
+    except Exception:
+        logging.error("Approve failed")
+        return
+
+    logging.info('Approve successfully')
+
+
+@switchPage
+def confirmWallet():
+    """Confirm wallet
+
+    Use for Transaction, Sign, Deploy Contract, Create Token, Add Token, Sign In, etc.
+    """
+
+    try:
+        wait_fast.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "button[data-testid='page-container-footer-next']")))
+    except Exception:
+        logging.warning('Refresh page')
+        driver.refresh()
+
+    wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "button[data-testid='page-container-footer-next']"))).click()
+
+    try:
+        wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "button[data-testid='eth-overview-send']")))
     except Exception:
         logging.error("Connect wallet failed")
         return
@@ -407,28 +443,18 @@ def signWallet():
 
 
 @switchPage
-def confirmTransaction():
-    """Confirm transaction
+def waitPendingWallet():
+    """Wait pending
     """
 
-    try:
-        wait.until(EC.element_to_be_clickable(
-            (By.XPATH, '//button[text()="Activity"]'))).click()
-        wait.until(EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, 'div.transaction-list__pending-transactions')))
-    except Exception:
-        logging.error("No transaction")
-
     wait.until(EC.element_to_be_clickable(
-        (By.XPATH, '//button[text()="Confirm"]'))).click()
+        (By.CSS_SELECTOR, "li[data-testid='home__activity-tab']"))).click()
 
     try:
-        wait_slow.until(EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, '.transaction-status--pending')))
-        wait_slow.until_not(EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, '.transaction-status--pending')))
+        wait_slow.until_not(EC.visibility_of_any_elements_located(
+            (By.CSS_SELECTOR, '.transaction-status-label--pending')))
     except Exception:
-        logging.error("Confirm transaction failed")
+        logging.error("Wait pending failed or timeout")
         return
 
-    logging.info('Confirm transaction successfully')
+    logging.info('Wait pending successfully')

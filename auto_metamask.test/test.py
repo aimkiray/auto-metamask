@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     metamask_path = downloadMetamask(
         'https://github.com/MetaMask/metamask-extension/releases/download/v10.34.0/metamask-chrome-10.34.0.zip')
-    driver = setupWebdriver(metamask_path)
+    driver = setupWebdriver(metamask_path, '/Applications/Chromium.app/Contents/MacOS/Chromium')
     # Test account, please do not use for production environment
     setupMetamask(
         'whip squirrel shine cabin access spell arrow review spread code fire marine', 'testtest')
@@ -37,7 +37,32 @@ if __name__ == '__main__':
     # MetaMask will pop up a window
     connectWallet()
 
+    # Click the 'Personal Sign' button
+    wait.until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, "button[id='personalSign']"))).click()
+    # MetaMask will pop up a window
+    confirmWallet()
 
+    # Click the 'Send Transaction' button
+    wait.until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, "button[id='sendButton']"))).click()
+    # MetaMask will pop up a window
+    confirmWallet()
+    waitPendingWallet()
+
+    # Click the 'Create Token' button
+    wait.until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, "button[id='createToken']"))).click()
+    # MetaMask will pop up a window
+    confirmWallet()
+    waitPendingWallet()
+
+    # Click the 'Approve Tokens' button
+    wait.until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, "button[id='approveTokens']"))).click()
+    # MetaMask will pop up a window
+    approveTokens()
+    waitPendingWallet()
 
     time.sleep(60)
     driver.quit()
