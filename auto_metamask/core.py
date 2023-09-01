@@ -12,7 +12,6 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.utils import ChromeType
 
 file_path = os.getcwd()
 log_format = "%(asctime)s %(levelname)s %(message)s"

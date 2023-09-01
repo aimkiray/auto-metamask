@@ -10,14 +10,13 @@ auto-metamask can be installed using pip:
 $ pip install auto-metamask
 ```
 
-Ensure you've installed either the [Chromium](https://www.chromium.org/getting-involved/download-chromium) or [Chrome](https://www.google.com/chrome/) browser. If no directory is specified, the system's default Chrome will be utilized. We advise against using the latest Chrome version due to a mismatch with its Chrome driver.
+Ensure you have either the Chromium or Chrome browser installed. Without a specified directory, the system's default Chrome will be utilized. It's advisable to avoid the newest Chrome version due to potential Chrome driver mismatches.
 
-The Metamask extension is optimized for version `10.34.0` from July 10, 2023. We recommend using this version. If you're considering an older version, please opt for version `0.1.3` of this package.
+For compatibility, use the Metamask extension version 10.34.0 dated July 10, 2023. If opting for an older version, install version 0.1.3 of this package.
 
-You also have the option to manually download a specific version of the Chromium browser and its matching Chrome driver. Once downloaded, provide its path to the `setupWebdriver` function.
+For manual installations, you can download a specific version of the Chromium browser and its corresponding Chrome driver. Then, provide its path to the setupWebdriver function.
 
-For a comprehensive archive of Chromium browser versions and their corresponding Chrome drivers, visit [here](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html).
-
+For a comprehensive list of Chromium browser versions and their matching Chrome drivers, visit here.
 
 ## Usage Examples
 
