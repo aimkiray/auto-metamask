@@ -43,11 +43,17 @@ def downloadMetamask(url):
     return local_filename
 
 
-def setupWebdriver(metamask_path, chrome_path=None):
+def setupWebdriver(metamask_path, chrome_path=None, version=None, chromedriver_path=None):
     """Initialize chrome browser and install metamask extension
 
     :param metamask_path: Extension file path
     :type metamask_path: String
+    :param chrome_path: Chrome browser path, default is None.
+    :type chrome_path: String
+    :param version: Chrome browser version, make sure it matches the chromedriver version, if not provided, the latest version will be used, default is None. if chromedriver_path is provided, this parameter will be ignored.
+    :type version: String
+    :param chromedriver_path: Chromedriver file path, default is None.
+    :type chromedriver_path: String
     :return: Selenium Chrome WebDriver
     :rtype: WebDriver
     """
@@ -63,10 +69,19 @@ def setupWebdriver(metamask_path, chrome_path=None):
     options.add_experimental_option('excludeSwitches', ['enable-automation'])
     options.add_experimental_option('useAutomationExtension', False)
     options.add_extension(metamask_path)
-    if chrome_path:
-        options.binary_location = chrome_path
+    if chrome_path and version:
+        if os.path.exists(chrome_path):
+            options.binary_location = chrome_path
+            logging.info("Chrome path is " + chrome_path + ", version is " + version)
+        else:
+            logging.warning("Chrome path not found")
+    else:
+        logging.warning("Chrome path or version not provided, using default")
 
-    s = Service(ChromeDriverManager(chrome_type=ChromeType.GOOGLE).install())
+    if chromedriver_path:
+        s = Service(chromedriver_path)
+    else:
+        s = Service(ChromeDriverManager(version=version, path=chromedriver_path).install())
     global driver
     driver = webdriver.Chrome(service=s, options=options)
 
@@ -338,7 +353,7 @@ def importPK(priv_key):
 
 
 @switchPage
-def connectWallet():
+def connect():
     """Connect wallet
     """
 
@@ -362,7 +377,7 @@ def connectWallet():
 
 
 @switchPage
-def approveWallet():
+def approve():
     """Approve wallet
     """
 
@@ -384,8 +399,11 @@ def approveWallet():
 
 
 @switchPage
-def approveTokens():
+def approveTokens(cap=None):
     """Approve tokens
+
+    :param cap: Spending limit, must be greater than 0, default is None.
+    :type cap: Number
     """
 
     try:
@@ -395,8 +413,16 @@ def approveTokens():
         logging.warning('Refresh page')
         driver.refresh()
 
-    wait.until(EC.element_to_be_clickable(
-        (By.XPATH, "//button[text()='Use default']"))).click()
+    if cap:
+        if isinstance(cap, int) and cap > 0:
+            wait.until(EC.visibility_of_element_located(
+                (By.CSS_SELECTOR, "input[id='custom-spending-cap']"))).send_keys(str(cap))
+        else:
+            logging.error("Invalid cap")
+            return
+    else:
+        wait.until(EC.element_to_be_clickable(
+            (By.XPATH, "//button[text()='Use default']"))).click()
     
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "button[data-testid='page-container-footer-next']"))).click()
@@ -416,7 +442,7 @@ def approveTokens():
 
 
 @switchPage
-def confirmWallet():
+def confirm():
     """Confirm wallet
 
     Use for Transaction, Sign, Deploy Contract, Create Token, Add Token, Sign In, etc.
@@ -443,15 +469,23 @@ def confirmWallet():
 
 
 @switchPage
-def waitPendingWallet():
+def waitPending(timeout=40):
     """Wait pending
+
+    :param timeout: Timeout (seconds)
+    :type timeout: Number
     """
 
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "li[data-testid='home__activity-tab']"))).click()
 
     try:
-        wait_slow.until_not(EC.visibility_of_any_elements_located(
+        if timeout and isinstance(timeout, int):
+            wait_temp = WebDriverWait(driver, timeout, 1)
+        else:
+            wait_temp = WebDriverWait(driver, 40, 1)
+
+        wait_temp.until_not(EC.visibility_of_any_elements_located(
             (By.CSS_SELECTOR, '.transaction-status-label--pending')))
     except Exception:
         logging.error("Wait pending failed or timeout")

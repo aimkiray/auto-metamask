@@ -1,16 +1,22 @@
 ## Overview
-Web3 applications often require the operation of wallets, such as MetaMask, for their functionality. This tool has been designed to automate the handling of the MetaMask component, making it easier for developers to test their applications.
+
+To streamline the testing process for developers, this tool automates the management of the MetaMask component, a wallet operation often essential for the functionality of Web3 applications.
 
 ## Installation
+
 auto-metamask can be installed using pip:
 
 ```shell
 $ pip install auto-metamask
 ```
 
-Please make sure that you have installed [Chromium](https://www.chromium.org/getting-involved/download-chromium) or [Chrome](https://www.google.com/chrome/) browser. If no directory is specified, the system default Chrome will be used. It is recommended not to use the latest version of Chrome, as there is no matching Chrome driver.
+Ensure you've installed either the Chromium or Chrome browser. In the absence of a specified directory, the default system Chrome will be used. It's advisable to avoid the newest version of Chrome due to the unavailability of a corresponding Chrome driver.
 
-The Metamask extension is compatible with version 10.34.0 from July 10, 2023. Please try to use this version. If you wish to use an older version, please use version 0.1.3 of this extension.
+The Metamask extension is optimized for version 10.34.0, dated July 10, 2023. It's recommended to use this version. For those inclined to use an earlier version, please opt for version 0.1.3 of this package.
+
+Alternatively, you can download a specific version of the Chromium browser along with the compatible Chrome driver manually. After downloading, provide its path to the setupWebdriver function.
+
+For a comprehensive list of Chromium browser versions and their respective Chrome drivers, visit: Chromium Browser Snapshots.
 
 ## Usage Examples
 
@@ -28,7 +34,7 @@ if __name__ == '__main__':
 
     metamask_path = downloadMetamask(
         'https://github.com/MetaMask/metamask-extension/releases/download/v10.34.0/metamask-chrome-10.34.0.zip')
-    driver = setupWebdriver(metamask_path, '/Applications/Chromium.app/Contents/MacOS/Chromium')
+    driver = setupWebdriver(metamask_path, '/Applications/Chromium.app/Contents/MacOS/Chromium', None, 'chromedriver_mac64/chromedriver')
     # Test account, please do not use for production environment
     setupMetamask(
         'whip squirrel shine cabin access spell arrow review spread code fire marine', 'testtest')
@@ -46,46 +52,48 @@ if __name__ == '__main__':
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "button[id='connectButton']"))).click()
     # MetaMask will pop up a window, complete the connection
-    connectWallet()
+    connect()
 
     # Click the 'Request Permissions' button
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "button[id='requestPermissions']"))).click()
     # MetaMask will pop up a window
-    connectWallet()
+    connect()
 
     # Click the 'Personal Sign' button
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "button[id='personalSign']"))).click()
     # MetaMask will pop up a window
-    confirmWallet()
+    confirm()
 
     # Click the 'Send Transaction' button
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "button[id='sendButton']"))).click()
     # MetaMask will pop up a window
-    confirmWallet()
-    waitPendingWallet()
+    confirm()
+    waitPending(20)
 
     # Click the 'Create Token' button
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "button[id='createToken']"))).click()
     # MetaMask will pop up a window
-    confirmWallet()
-    waitPendingWallet()
+    confirm()
+    waitPending(20)
 
     # Click the 'Approve Tokens' button
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "button[id='approveTokens']"))).click()
     # MetaMask will pop up a window
-    approveTokens()
-    waitPendingWallet()
+    approveTokens(6)
+    waitPending(20)
 
     time.sleep(60)
     driver.quit()
 ```
 
 ## API Reference
+
+<a id="auto_metamask.core.downloadMetamask"></a>
 
 #### downloadMetamask
 
@@ -108,7 +116,10 @@ Download the metamask extension
 #### setupWebdriver
 
 ```python
-def setupWebdriver(metamask_path, chrome_path=None)
+def setupWebdriver(metamask_path,
+                   chrome_path=None,
+                   version=None,
+                   chromedriver_path=None)
 ```
 
 Initialize chrome browser and install metamask extension
@@ -116,6 +127,9 @@ Initialize chrome browser and install metamask extension
 **Arguments**:
 
 - `metamask_path` (`String`): Extension file path
+- `chrome_path` (`String`): Chrome browser path, default is None.
+- `version` (`String`): Chrome browser version, make sure it matches the chromedriver version, if not provided, the latest version will be used, default is None. if chromedriver_path is provided, this parameter will be ignored.
+- `chromedriver_path` (`String`): Chromedriver file path, default is None.
 
 **Returns**:
 
@@ -185,24 +199,24 @@ Import private key
 
 - `priv_key` (`String`): Private key
 
-<a id="auto_metamask.core.connectWallet"></a>
+<a id="auto_metamask.core.connect"></a>
 
-#### connectWallet
+#### connect
 
 ```python
 @switchPage
-def connectWallet()
+def connect()
 ```
 
 Connect wallet
 
-<a id="auto_metamask.core.approveWallet"></a>
+<a id="auto_metamask.core.approve"></a>
 
-#### approveWallet
+#### approve
 
 ```python
 @switchPage
-def approveWallet()
+def approve()
 ```
 
 Approve wallet
@@ -213,34 +227,42 @@ Approve wallet
 
 ```python
 @switchPage
-def approveTokens()
+def approveTokens(cap=None)
 ```
 
 Approve tokens
 
-<a id="auto_metamask.core.confirmWallet"></a>
+**Arguments**:
 
-#### confirmWallet
+- `cap` (`Number`): Spending limit, must be greater than 0, default is None.
+
+<a id="auto_metamask.core.confirm"></a>
+
+#### confirm
 
 ```python
 @switchPage
-def confirmWallet()
+def confirm()
 ```
 
 Confirm wallet
 
 Use for Transaction, Sign, Deploy Contract, Create Token, Add Token, Sign In, etc.
 
-<a id="auto_metamask.core.waitPendingWallet"></a>
+<a id="auto_metamask.core.waitPending"></a>
 
-#### waitPendingWallet
+#### waitPending
 
 ```python
 @switchPage
-def waitPendingWallet()
+def waitPending(timeout=40)
 ```
 
 Wait pending
+
+**Arguments**:
+
+- `timeout` (`Number`): Timeout (seconds)
 
 ## Credits
 
