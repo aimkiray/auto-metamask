@@ -301,6 +301,15 @@ def changeNetwork(network_name):
     wait.until(EC.element_to_be_clickable(
         (By.CSS_SELECTOR, "button[data-testid='network-display']"))).click()
 
+
+
+    try:
+        wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "label.toggle-button"))).click()
+
+    except Exception:
+        logging.error("no need to show test networks")
+
     # click the network name
     wait.until(EC.presence_of_element_located(
         (By.XPATH, "//span[text()='{}']".format(network_name)))).click()
