@@ -64,5 +64,8 @@ if __name__ == '__main__':
     approveTokens(6)
     waitPending(20)
 
+    # Click the 'disconnect' button
+    disconnect()
+
     time.sleep(60)
     driver.quit()
