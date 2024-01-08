@@ -500,3 +500,23 @@ def waitPending(timeout=40):
         return
 
     logging.info('Wait pending successfully')
+
+@switchPage
+def disconnect():
+    """
+    Disconnect wallet from given sites after transaction done.
+    :return:
+    """
+    try:
+        wait.until(EC.element_to_be_clickable(
+            (By.XPATH, "//button[@data-testid='account-options-menu-button']"))).click()
+        wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "button[data-testid='global-menu-connected-sites'"))).click()
+        wait.until(EC.element_to_be_clickable(
+            (By.XPATH, '//*[@id="popover-content"]/div/div/section/div[2]/main/div/a'))).click()
+        wait.until(EC.element_to_be_clickable(
+            (By.XPATH, "//button[contains(text(),'Disconnect')]"))).click()
+        logging.info('Disconnect successfully')
+    except Exception:
+        logging.warning('Disconnect failed')
+        return
