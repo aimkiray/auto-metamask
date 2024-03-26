@@ -58,6 +58,7 @@ def setupWebdriver(metamask_path, chrome_path=None, version=None, chromedriver_p
     """
 
     options = Options()
+
     # options.add_argument('--start-maximized')
     options.add_argument("--window-size=1440,900")
     options.add_argument('--no-sandbox')
@@ -67,6 +68,7 @@ def setupWebdriver(metamask_path, chrome_path=None, version=None, chromedriver_p
     # options.binary_location = "/Applications/Google Chrome Dev.app/Contents/MacOS/Google Chrome Dev"
     options.add_experimental_option('excludeSwitches', ['enable-automation'])
     options.add_experimental_option('useAutomationExtension', False)
+
     options.add_extension(metamask_path)
     if chrome_path and version:
         if os.path.exists(chrome_path):
@@ -466,6 +468,22 @@ def confirm():
 
     logging.info('Sign successfully')
 
+@switchPage
+def reject():
+    """Reject Transaction
+
+    Use for Transaction, Sign, Deploy Contract, Create Token, Add Token, Sign In, etc.
+    """
+
+    try:
+        wait_fast.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "button[data-testid='page-container-footer-cancel']")))
+    except Exception:
+        logging.warning('Refresh page')
+        driver.refresh()
+
+    wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "button[data-testid='page-container-footer-cancel']"))).click()
 
 @switchPage
 def waitPending(timeout=40):
